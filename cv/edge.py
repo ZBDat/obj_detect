@@ -2,6 +2,7 @@ import cv2
 import os
 import numpy as np
 from matplotlib import pyplot as plt
+from distortion import trape
 
 
 def edgeDetect(image):
@@ -13,6 +14,7 @@ def edgeDetect(image):
     # image = cv2.bilateralFilter(image, 7, sigmaColor=50, sigmaSpace=50)
     # image = cv2.fastNlMeansDenoising(image, None, h=20, templateWindowSize=5, searchWindowSize=31)
     
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 91, 30)
     kernel = np.ones((3,3), np.uint8)
     kernel_2 = np.ones((5,5), np.uint8)
@@ -27,10 +29,6 @@ def edgeDetect(image):
     lower = int(max(0, (1.0 - sigma) * v))
     upper = int(min(255, (1.0 + sigma) * v))
     edges = cv2.Canny(image, threshold1=lower, threshold2=upper)
-    
-    plt.imshow(edges, cmap='gray')
-    plt.title('Edge Image')
-    plt.show()
     
     contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -48,19 +46,23 @@ def edgeDetect(image):
 
 
 if __name__ == "__main__":
-    path = 'test_images'
+    path = '...'
     files = os.listdir(path)
     for file in files:
         ori_image = cv2.imread(os.path.join(path, file))
-        image = cv2.cvtColor(ori_image, cv2.COLOR_BGR2GRAY)
-        image = cv2.convertScaleAbs(image, alpha=1.2)
-        
+        p1 = [601, 136]
+        p2 = [2238, 117]
+        p3 = [2336, 1400]
+        p4 = [499, 1405]
+        image = trape(ori_image, p1, p2, p3, p4)
+        # image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # image = cv2.convertScaleAbs(image, alpha=1.2)
         max_length, max_contour = edgeDetect(image)
 
         if max_contour is not None:
             print(file, "max length of contours:", max_length)
             # Draw the max contour on the image
-            image_with_contour = cv2.drawContours(ori_image, [max_contour], -1, (0, 255, 0), 2)
+            image_with_contour = cv2.drawContours(image, [max_contour], -1, (0, 255, 0), 2)
             plt.imshow(image_with_contour)
             plt.title('Image with Contour')
             plt.show()

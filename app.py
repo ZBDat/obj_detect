@@ -39,6 +39,16 @@ def get_yolo_result():
     ret = True
     frame = './test_images/sample.png'
     if ret:
+        if corner_points:
+            p1 = corner_points['p1']
+            p2 = corner_points['p2']
+            p3 = corner_points['p3']
+            p4 = corner_points['p4']
+            frame = trape(frame, p1, p2, p3, p4)
+            cv2.imwrite('capture.png', frame)
+        else:
+            cv2.imwrite('capture.png', frame)
+        
         bbox_list = detector.detect('capture.png', draw=True) # draw: draw the bounding boxes
         if bbox_list:
             result = 'Object detected!'
@@ -61,8 +71,9 @@ def get_yolo_result():
     
 # ------------------ get results from cv methods -----------------------
 # ----------------------------------------------------------------------
-@app.route('/corner_points', methods=['PUT'])
+@app.route('/corner_points', methods=['POST'])
 def update_corners():
+    # sequence：start up-left, clockwise.
     corner_points = request.json
     return "Corner points updated!"
 
